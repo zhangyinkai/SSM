@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${e==null?'':e.error}">出错了~</title>
+</head>
+<body>
+ <p>
+     错误码：<text th:text="${e==null?'':e.state}"></text>
+ </p>
+ <p>
+     错误描述：<text th:text="${e==null?'':e.error}"></text>
+ </p>
+</body>
+</html>

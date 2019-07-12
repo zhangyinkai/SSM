@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <meta charset="UTF-8">
+    <title>notice</title>
+</head>
+<body>
+    <span th:text="${id}" ></span>
+    <ul>
+        <li th:text="${sysNotice}"></li>
+    </ul>
+    <p><a href="/ssm/notice/add" > 添加 </a></p>
+
+    <p><a th:attr="href='/ssm/notice/update/'+${id}" > 修改 </a></p>
+
+    <p><a href="/ssm/notice/cleanAllCache" > 清空缓存 </a></p>
+
+</body>
+</html>

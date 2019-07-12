@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+         http://www.springframework.org/schema/beans/spring-beans.xsd
+          http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+    <!-- *** 导入外部配置文件开始 *** -->
+    <context:property-placeholder location="classpath:conf/redis.properties"  />
+    <!-- === 导入外部配置文件结束 === -->
+    <!-- 植入aspectj 环境-->
+    <context:load-time-weaver />
+    <!--  -->
+    <bean id="jedisPoolConfig" class="redis.clients.jedis.JedisPoolConfig">
+        <property name="maxIdle" value="${redis.maxIdle}" />
+        <property name="maxWaitMillis" value="${redis.maxWait}" />
+        <property name="testOnBorrow" value="${redis.testOnBorrow}" />
+    </bean>
+
+    <bean id="mapPropertySource" class="org.springframework.core.env.MapPropertySource">
+        <constructor-arg>
+            <value type="java.lang.String">redis.propertis</value>
+        </constructor-arg>
+        <constructor-arg>
+            <map>
+                <entry key="spring.redis.cluster.nodes" value="${spring.redis.cluster.nodes}"></entry>
+                <entry key="spring.redis.cluster.max-redirects" value="${spring.redis.cluster.max-redirects}"></entry>
+            </map>
+        </constructor-arg>
+    </bean>
+    <bean id="redisClusterConfiguration" class="org.springframework.data.redis.connection.RedisClusterConfiguration">
+        <constructor-arg name="propertySource" ref="mapPropertySource" />
+    </bean>
+    <bean id="redisClusterConnectionFactory" class="org.springframework.data.redis.connection.jedis.JedisConnectionFactory">
+        <constructor-arg ref="redisClusterConfiguration" />
+        <constructor-arg ref="jedisPoolConfig" />
+        <property name="password" value="${redis.pass}" />
+        <property name="timeout" value="${redis.timeout}" />
+    </bean>
+
+    <bean id="stringRedisSerializer" class="org.springframework.data.redis.serializer.StringRedisSerializer" />
+
+    <bean id="redisTemplate" class="org.springframework.data.redis.core.RedisTemplate">
+        <property name="connectionFactory" ref="redisClusterConnectionFactory" />
+        <property name="keySerializer" ref="stringRedisSerializer" />
+    </bean>
+
+    <bean id="cacheManager" class="org.springframework.data.redis.cache.RedisCacheManager">
+        <constructor-arg ref="redisTemplate" />
+    </bean>
+    <cache:annotation-driven cache-manager="cacheManager" mode="aspectj"/>
+</beans>
